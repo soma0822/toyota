@@ -14,7 +14,7 @@ SERVO = 14
 # MIN = 369
 PWM_FORWARD_MAX = 363
 PWM_FORWARD_MID = 365
-PWM_FORWARD_MIN = 367
+PWM_FORWARD_MIN = 365
 PWM_STOP        = 380
 PWM_BACK        = 395
 
@@ -64,7 +64,7 @@ except Exception as e:
 ftext = 'a'
 logTime = time.time()
 
-environment = 1 # 0:本番環境, 1:テスト環境（ログが出る）
+environment = 0 # 0:本番環境, 1:テスト環境（ログが出る）
 
 if environment == 1:
     def Log(text, d_fr, d_lh, d_rh):
@@ -116,8 +116,30 @@ def Cntl(d_fr, d_lh, d_rh):
         pwm.set_pwm(SPEED, 0, PWM_STOP)
         return False
     else:
-        d_lr = d_lh - d_rh
-        if -LR_DIFF < d_lr and d_lr < LR_DIFF:
+        # d_lr = d_lh - d_rh
+        # if -LR_DIFF < d_lr and d_lr < LR_DIFF:
+        #     Log('前に進む', d_fr, d_lh, d_rh)
+        #     # 前輪をまっすぐ向ける
+        #     pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
+        #     if 200 <= d_fr and 80 <= d_lh and 80 <= d_rh:
+        #         pwm.set_pwm(SPEED, 0, PWM_FORWARD_MAX)
+        #     elif 100 < d_fr :
+        #         pwm.set_pwm(SPEED, 0, PWM_FORWARD_MID)
+        #     else :
+        #         pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
+        if d_lh > 100 or d_rh < 20:
+            Log('左に曲がる', d_fr, d_lh, d_rh)
+            # 前輪を左に向ける
+            pwm.set_pwm(SERVO, 0, PWM_LEFT)
+            # タイヤを前進方向に回転させる
+            pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
+        elif d_lh < 50 or (d_fr < d_rh - 50):
+            Log('右に曲がる', d_fr, d_lh, d_rh)
+            # 前輪を右に向ける
+            pwm.set_pwm(SERVO, 0, PWM_RIGHT)
+            # タイヤを前進方向に回転させる
+            pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
+        else:
             Log('前に進む', d_fr, d_lh, d_rh)
             # 前輪をまっすぐ向ける
             pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
@@ -127,18 +149,6 @@ def Cntl(d_fr, d_lh, d_rh):
                 pwm.set_pwm(SPEED, 0, PWM_FORWARD_MID)
             else :
                 pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
-        elif d_lh < 20 or (d_lr <= -LR_DIFF and d_fr < 200):
-            Log('右に曲がる', d_fr, d_lh, d_rh)
-            # 前輪を右に向ける
-            pwm.set_pwm(SERVO, 0, PWM_RIGHT)
-            # タイヤを前進方向に回転させる
-            pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
-        elif d_rh < 20 or (LR_DIFF <= d_lr and d_fr < 200):
-            Log('左に曲がる', d_fr, d_lh, d_rh)
-            # 前輪を左に向ける
-            pwm.set_pwm(SERVO, 0, PWM_LEFT)
-            # タイヤを前進方向に回転させる
-            pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
         return True
 
 while True:  #以下の部分をずっと繰り返す
@@ -149,4 +159,5 @@ while True:  #以下の部分をずっと繰り返す
     d_rh = Measure(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
     
     Cntl(d_fr, d_lh, d_rh)
-    time.sleep(0.01)
+    # time.sleep(0.01)
+
