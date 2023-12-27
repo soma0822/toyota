@@ -127,13 +127,13 @@ def Cntl(d_fr, d_lh, d_rh):
         #         pwm.set_pwm(SPEED, 0, PWM_FORWARD_MID)
         #     else :
         #         pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
-        if d_lh > 100 or d_rh < 20:
+        if d_lh > 140 or d_rh < 20:
             Log('左に曲がる', d_fr, d_lh, d_rh)
             # 前輪を左に向ける
             pwm.set_pwm(SERVO, 0, PWM_LEFT)
             # タイヤを前進方向に回転させる
             pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
-        elif d_lh < 50 or (d_fr < d_rh - 50):
+        elif d_lh < 70 or (d_fr < d_rh and d_fr < 100):
             Log('右に曲がる', d_fr, d_lh, d_rh)
             # 前輪を右に向ける
             pwm.set_pwm(SERVO, 0, PWM_RIGHT)
@@ -143,7 +143,7 @@ def Cntl(d_fr, d_lh, d_rh):
             Log('前に進む', d_fr, d_lh, d_rh)
             # 前輪をまっすぐ向ける
             pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
-            if 200 <= d_fr and 80 <= d_lh and 80 <= d_rh:
+            if 200 <= d_fr:
                 pwm.set_pwm(SPEED, 0, PWM_FORWARD_MAX)
             elif 100 < d_fr :
                 pwm.set_pwm(SPEED, 0, PWM_FORWARD_MID)
@@ -159,5 +159,9 @@ while True:  #以下の部分をずっと繰り返す
     d_rh = Measure(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
     
     Cntl(d_fr, d_lh, d_rh)
-    # time.sleep(0.01)
+
+# 12/27記録
+# 32.65
+# 32.38
+# 31.82
 
