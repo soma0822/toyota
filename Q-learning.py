@@ -64,7 +64,7 @@ def sigint_handler(signum, frame):
             break
     sig = 0
 
-def sigint_handler2(signum, frame):
+def sigquit_handler(signum, frame):
     global sig
     global sig_flag
     sig = 1
@@ -89,7 +89,7 @@ def sigill_handler(signum, frame):
     sys.exit(0)
 
 signal.signal(signal.SIGINT, sigint_handler)
-signal.signal(signal.SIGQUIT, sigint_handler2)
+signal.signal(signal.SIGQUIT, sigquit_handler)
 signal.signal(signal.SIGILL, sigill_handler)
 
 import numpy as np
