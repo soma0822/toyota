@@ -95,7 +95,7 @@ signal.signal(signal.SIGILL, sigill_handler)
 import numpy as np
 
 # 状態空間の定義 (超音波センサーの距離)
-states = [(d1, d2, d3) for d1 in range(10) for d2 in range(10) for d3 in range(10)]
+states = [(d1, d2, d3) for d1 in range(11) for d2 in range(11) for d3 in range(11)]
 state_index = {state: i for i, state in enumerate(states)}
 
 # 行動空間の定義 (前進、左折、右折)
@@ -124,7 +124,7 @@ def Measure(trig, echo):
     distance = (sigoff - sigon)*34000/2 #距離を計算(単位はcm)
     if 200 < distance:
         distance = 200 #距離が200cm以上の場合は200cmを返す
-    return int(distance / 21)
+    return int(distance / 20)
 
 def get_state():
     time.sleep(0.01)
