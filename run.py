@@ -2,6 +2,7 @@ import Adafruit_PCA9685
 import time  #timeというモジュールを使用する
 import RPi.GPIO as GPIO #ラズパイのGPIOピンを操作するためのモジュール
 
+
 # pin number
 SPEED = 13
 SERVO = 14

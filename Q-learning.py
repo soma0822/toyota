@@ -4,6 +4,8 @@ import RPi.GPIO as GPIO #ラズパイのGPIOピンを操作するためのモジ
 from datetime import datetime #日時を取得するためのモジュール
 import os #ファイル操作のためのモジュール
 import signal
+import sys
+import csv
 
 # pin number
 SPEED = 13
@@ -53,6 +55,9 @@ sig_flag = 0
 
 def sigint_handler(signum, frame):
     global sig
+    pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
+    # タイヤを停止させる
+    pwm.set_pwm(SPEED, 0, PWM_STOP)
     while True:
         time.sleep(1)
         if sig == 1:
@@ -61,10 +66,31 @@ def sigint_handler(signum, frame):
 
 def sigint_handler2(signum, frame):
     global sig
+    global sig_flag
     sig = 1
+    sig_flag = 1
+
+def sigill_handler(signum, frame):
+    pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
+    # タイヤを停止させる
+    pwm.set_pwm(SPEED, 0, PWM_STOP)
+    csv_file_path = "q_table.csv"
+    with open(csv_file_path, 'w', newline='') as csv_file:
+        writer = csv.writer(csv_file)
+        
+        # ヘッダーを書き込む（状態と行動の組み合わせを列に持つ）
+        header = ["State"] + actions
+        writer.writerow(header)
+        
+        # Qテーブルの内容を書き込む
+        for i, state in enumerate(states):
+            row = [str(state)] + [str(q) for q in q_table[i]]
+            writer.writerow(row)
+    sys.exit(0)
 
 signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGQUIT, sigint_handler2)
+signal.signal(signal.SIGILL, sigill_handler)
 
 import numpy as np
 
@@ -98,7 +124,7 @@ def Measure(trig, echo):
     distance = (sigoff - sigon)*34000/2 #距離を計算(単位はcm)
     if 200 < distance:
         distance = 200 #距離が200cm以上の場合は200cmを返す
-    return int(distance / 20)
+    return int(distance / 21)
 
 def get_state():
     time.sleep(0.01)
@@ -128,35 +154,43 @@ def simulate_environment(state, action):
     # 仮のシミュレーション関数
     # 実際にはセンサーデータから状態を決定し、行動に応じて報酬と次の状態が得られる
     # この例ではランダムな報酬と次の状態を返す
+    if (action == "Forward"):
+        pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
+        pwm.set_pwm(SPEED, 0, PWM_FORWARD_MID)
+    elif (action == "Right"):
+        pwm.set_pwm(SERVO, 0, PWM_RIGHT)
+        pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
+    elif (action == "Left"):
+        pwm.set_pwm(SERVO, 0, PWM_LEFT)
+        pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
     next_state = get_state()
     reward = get_reward(state, next_state, action)
     return reward, next_state
 
 # Q学習の更新
-def Cntl(d_fr, d_lh, d_rh):
-    global sig_flag
-    d_fr = Measure(trig_arr[FRONT_SENSOR],echo_arr[FRONT_SENSOR])
-    d_lh = Measure(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
-    d_rh = Measure(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
-    state = (d_fr, d_lh, d_rh)
-    while True:
-        if np.random.rand() < exploration_rate:
-            action = np.random.choice(actions)
-        else:
-            action = actions[np.argmax(q_table[state_index[state]])]
 
-        reward, next_state = simulate_environment(state, action)
+d_fr = Measure(trig_arr[FRONT_SENSOR],echo_arr[FRONT_SENSOR])
+d_lh = Measure(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
+d_rh = Measure(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
+state = (d_fr, d_lh, d_rh)
+while True:
+    if np.random.rand() < exploration_rate:
+        action = np.random.choice(actions)
+    else:
+        action = actions[np.argmax(q_table[state_index[state]])]
 
-        # Q値の更新
-        if (sig_flag == 1):
-            sig_flag = 0
-            state = (d_fr, d_lh, d_rh)
-            continue
-        q_table[state_index[state], action_index[action]] = \
-            (1 - learning_rate) * q_table[state_index[state], action_index[action]] + \
-            learning_rate * (reward + discount_factor * np.max(q_table[state_index[next_state]]))
+    reward, next_state = simulate_environment(state, action)
 
-        state = next_state
+    # Q値の更新
+    if (sig_flag == 1):
+        sig_flag = 0
+        state = (d_fr, d_lh, d_rh)
+        continue
+    q_table[state_index[state], action_index[action]] = \
+        (1 - learning_rate) * q_table[state_index[state], action_index[action]] + \
+        learning_rate * (reward + discount_factor * np.max(q_table[state_index[next_state]]))
+
+    state = next_state
 
 #超音波センサーで距離を測る関数
 

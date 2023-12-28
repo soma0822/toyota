@@ -3,6 +3,7 @@ import time  #timeというモジュールを使用する
 import RPi.GPIO as GPIO #ラズパイのGPIOピンを操作するためのモジュール
 from datetime import datetime #日時を取得するためのモジュール
 import os #ファイル操作のためのモジュール
+import signal
 
 # pin number
 SPEED = 13
@@ -33,6 +34,24 @@ trig_arr = [15,13,32] #Trigピン番号(正面、左、右)
 echo_arr = [26,24,31] #Echoピン番号(正面、左、右)
 
 LR_DIFF = 20
+
+sig = 0
+sig_flag = 0
+
+def sigint_handler(signum, frame):
+    global sig
+    while True:
+        time.sleep(1)
+        if sig == 1:
+            break
+    sig = 0
+
+def sigint_handler2(signum, frame):
+    global sig
+    sig = 1
+
+signal.signal(signal.SIGINT, sigint_handler)
+signal.signal(signal.SIGQUIT, sigint_handler2)
 
 pwm = Adafruit_PCA9685.PCA9685(address=0x40)
 pwm.set_pwm_freq(60)
