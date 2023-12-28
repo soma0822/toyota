@@ -94,35 +94,29 @@ signal.signal(signal.SIGILL, sigill_handler)
 
 import numpy as np
 
-# 状態空間の定義 (超音波センサーの距離)
-states = [(d1, d2, d3) for d1 in range(11) for d2 in range(11) for d3 in range(11)]
-state_index = {state: i for i, state in enumerate(states)}
-
-# 行動空間の定義 (前進、左折、右折)
+LR_DIFF = 0
 actions = ["Forward", "Left", "Right"]
 action_index = {action: i for i, action in enumerate(actions)}
 
-csv_file_path = "q_table.csv"
-try:
-    with open(csv_file_path, 'r') as csv_file:
-        reader = csv.reader(csv_file)
-        
-        # ヘッダーをスキップ
-        header = next(reader)
-        
-        # 状態と行動に関連するQ値を読み込む
-        states = []
-        q_table = []
-        for row in reader:
-            states.append(eval(row[0]))  # evalを使って文字列をPythonオブジェクトに変換
-            q_table.append([float(q) for q in row[1:]])
-        states = np.array(states)
-        q_table = np.array(q_table)
-except FileNotFoundError:
-    # ファイルが存在しない場合は全てのQ値を0で初期化
-    q_table = np.zeros((len(states), len(actions)))
+states = [(d1, d2, d3) for d1 in range(11) for d2 in range(11) for d3 in range(11)]
+state_index = {state: i for i, state in enumerate(states)}
+q_table = np.zeros((len(states), len(actions)))
 
-# 読み込んだデータをnumpy arrayに変換
+
+for f in range(0,11):
+	for l in range(0,11):
+		for r in range(0,11):
+			state = (f, l, r)
+			d_lr = l - r
+			if -LR_DIFF < d_lr and d_lr < LR_DIFF:
+				action = "Forward"
+			elif l < 1 or (d_lr <= -LR_DIFF and f < 10):
+				action = "Right"
+			elif r < 1 or (LR_DIFF <= d_lr and f < 10):
+				action = "Left"
+			else:
+				action = "Forward"
+			q_table[state_index[state], action_index[action]] = 1
 
 # パラメータの設定
 learning_rate = 0.1
@@ -146,7 +140,7 @@ def Measure(trig, echo):
     return int(distance / 20)
 
 def get_state():
-    time.sleep(0.1)
+    time.sleep(0.01)
     d_fr = Measure(trig_arr[FRONT_SENSOR],echo_arr[FRONT_SENSOR])
     d_lh = Measure(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
     d_rh = Measure(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
@@ -154,7 +148,7 @@ def get_state():
     return state
 
 def get_reward(state, next_state, action):
-    if next_state[0] <= 1:
+    if next_state[0] == 0:
         return -10
     elif next_state[1] < 3 and next_state[1] < state[1]:
         return -5
@@ -168,8 +162,9 @@ def get_reward(state, next_state, action):
         return 1
     
 
-# シミュレーション上での報酬と次の状態
+# シミュレーション上での報酬と次の状態の仮定
 def simulate_environment(state, action):
+
     if (action == "Forward"):
         pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
         pwm.set_pwm(SPEED, 0, PWM_FORWARD_MID)
@@ -183,17 +178,12 @@ def simulate_environment(state, action):
     reward = get_reward(state, next_state, action)
     return reward, next_state
 
-while True:
-    time.sleep(1)
-    if sig_flag == 1:
-        sig_flag = 0
-        sig = 0
-        break
+# Q学習の更新
+
 d_fr = Measure(trig_arr[FRONT_SENSOR],echo_arr[FRONT_SENSOR])
 d_lh = Measure(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
 d_rh = Measure(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
 state = (d_fr, d_lh, d_rh)
-
 while True:
     action = actions[np.argmax(q_table[state_index[state]])]
 
@@ -222,25 +212,8 @@ while True:
 #     Cntl(d_fr, d_lh, d_rh)
 #     time.sleep(0.01)
 
-# csv_file_path = "q_table.csv"
-# with open(csv_file_path, 'r') as csv_file:
-#     reader = csv.reader(csv_file)
-    
-#     # ヘッダーをスキップ
-#     header = next(reader)
-    
-#     # 状態と行動に関連するQ値を読み込む
-#     states = []
-#     q_table = []
-#     for row in reader:
-#         states.append(eval(row[0]))  # evalを使って文字列をPythonオブジェクトに変換
-#         q_table.append([float(q) for q in row[1:]])
-
-# # 読み込んだデータをnumpy arrayに変換
-# states = np.array(states)
-# q_table = np.array(q_table)
-
-# # 学習後、Qテーブルを使用して運転
+# 学習後、Qテーブルを使用して運転
+# current_state = (2, 4, 1)  # 仮の初期状態
 # while True:
 #     action = actions[np.argmax(q_table[state_index[current_state]])]
 #     print(f"Taking action: {action}")
