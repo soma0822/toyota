@@ -35,6 +35,14 @@ class FeedbackServer:
 # feedback_server = FeedbackServer()
 # feedback_server.start_listening()
 
+# while True:
+#     feedback = feedback_server.get_feedback()
+#     if feedback == 1:
+#         print("good action!")
+#     elif feedback == -1:
+#         print("bad action!")
+
+
 # 以下のget_reward関数の中で、フィードバックの仕様例を示す
 
 # def get_reward(current_state, action, next_state):
@@ -61,12 +69,13 @@ class FeedbackServer:
 #     reward += TIME_PENALTY
 
 #     # 行いに対するフィードバック
-#     if feedback_server.get_feedback() == 1:
+#     feedback = feedback_server.get_feedback()
+#     if feedback == 1:
 #         print("good action!")
-#         return 1
-#     elif feedback_server.get_feedback() == -1:
+#         reward += GOOD_ACTION_REWARD
+#     elif feedback == -1:
 #         print("bad action!")
-#         return -1
+#         reward += BAD_ACTION_PENALTY
 
 #     # 安全距離保持の報酬
 #     if all(distance >= SAFE_DISTANCE for distance in next_state):
