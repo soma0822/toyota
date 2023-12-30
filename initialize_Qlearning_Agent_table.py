@@ -29,7 +29,10 @@ for f in range(0,11):
             state = (f, l, r)
             d_lr = l - r
             action = Cntl(f, l, r)
-            if action != "Stop":
+            if action == "Stop":
+                for action in actions:
+                    q_table[state_index[state], action_index[action]] = -1
+            else:
                 q_table[state_index[state], action_index[action]] = 0.01
 
 np.savetxt("test.csv", q_table, delimiter=",")
