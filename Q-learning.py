@@ -7,6 +7,8 @@ import signal
 import sys
 import csv
 
+from q_learning_agent import QLearningAgent
+
 # pin number
 SPEED = 13
 SERVO = 14
@@ -37,6 +39,7 @@ echo_arr = [26,24,31] #Echoピン番号(正面、左、右)
 
 LR_DIFF = 20
 
+
 pwm = Adafruit_PCA9685.PCA9685(address=0x40)
 pwm.set_pwm_freq(60)
 
@@ -52,6 +55,16 @@ pwm.set_pwm(SPEED, 0, PWM_STOP)
 
 sig = 0
 sig_flag = 0
+
+Q_TABLE_PATH = "test.csv"
+actions = ["Forward", "Left", "Right"]
+action_index = {action: i for i, action in enumerate(actions)}
+
+states = [(d1, d2, d3) for d1 in range(11) for d2 in range(11) for d3 in range(11)]
+state_index = {state: i for i, state in enumerate(states)}
+
+agent = QLearningAgent(actions, states, Q_TABLE_PATH)
+
 
 def sigint_handler(signum, frame):
     global sig
@@ -74,18 +87,8 @@ def sigill_handler(signum, frame):
     pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
     # タイヤを停止させる
     pwm.set_pwm(SPEED, 0, PWM_STOP)
-    csv_file_path = "q_table.csv"
-    with open(csv_file_path, 'w', newline='') as csv_file:
-        writer = csv.writer(csv_file)
-        
-        # ヘッダーを書き込む（状態と行動の組み合わせを列に持つ）
-        header = ["State"] + actions
-        writer.writerow(header)
-        
-        # Qテーブルの内容を書き込む
-        for i, state in enumerate(states):
-            row = [str(state)] + [str(q) for q in q_table[i]]
-            writer.writerow(row)
+    # Qテーブルを保存
+    agent.save_q_table(Q_TABLE_PATH)
     sys.exit(0)
 
 signal.signal(signal.SIGINT, sigint_handler)
@@ -95,34 +98,8 @@ signal.signal(signal.SIGILL, sigill_handler)
 import numpy as np
 
 LR_DIFF = 0
-actions = ["Forward", "Left", "Right"]
-action_index = {action: i for i, action in enumerate(actions)}
-
-states = [(d1, d2, d3) for d1 in range(11) for d2 in range(11) for d3 in range(11)]
-state_index = {state: i for i, state in enumerate(states)}
-q_table = np.zeros((len(states), len(actions)))
 
 
-for f in range(0,11):
-	for l in range(0,11):
-		for r in range(0,11):
-			state = (f, l, r)
-			d_lr = l - r
-			if -LR_DIFF < d_lr and d_lr < LR_DIFF:
-				action = "Forward"
-			elif l < 1 or (d_lr <= -LR_DIFF and f < 10):
-				action = "Right"
-			elif r < 1 or (LR_DIFF <= d_lr and f < 10):
-				action = "Left"
-			else:
-				action = "Forward"
-			q_table[state_index[state], action_index[action]] = 1
-
-# パラメータの設定
-learning_rate = 0.1
-discount_factor = 0.9
-exploration_rate = 0.1
-epochs = 1000
 
 def Measure(trig, echo):
     sigon  = 0 #Echoピンの電圧が0V→3.3Vに変わった時間を記録する変数
@@ -185,7 +162,7 @@ d_lh = Measure(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
 d_rh = Measure(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
 state = (d_fr, d_lh, d_rh)
 while True:
-    action = actions[np.argmax(q_table[state_index[state]])]
+    action = agent.get_action(state)
 
     reward, next_state = simulate_environment(state, action)
 
@@ -194,9 +171,7 @@ while True:
         sig_flag = 0
         state = (d_fr, d_lh, d_rh)
         continue
-    q_table[state_index[state], action_index[action]] = \
-        (1 - learning_rate) * q_table[state_index[state], action_index[action]] + \
-        learning_rate * (reward + discount_factor * np.max(q_table[state_index[next_state]]))
+    agent.learn(state, action, reward, next_state)
 
     state = next_state
 
