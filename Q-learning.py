@@ -1,11 +1,7 @@
 import Adafruit_PCA9685
 import time  #timeというモジュールを使用する
-import RPi.GPIO as GPIO #ラズパイのGPIOピンを操作するためのモジュール
-from datetime import datetime #日時を取得するためのモジュール
-import os #ファイル操作のためのモジュール
 import signal
 import sys
-import csv
 
 from q_learning_agent import QLearningAgent
 from raspberry_pi_controller import RaspberryPiController
