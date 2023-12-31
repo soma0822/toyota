@@ -8,6 +8,7 @@ import sys
 import csv
 
 from q_learning_agent import QLearningAgent
+from raspberry_pi_controller import RaspberryPiController
 
 # pin number
 SPEED = 13
@@ -29,26 +30,10 @@ PWM_LEFT     = 290
 PWM_STRAIGHT = 340
 PWM_RIGHT    = 390
 
-# array index
-FRONT_SENSOR = 0
-LEFT_SENSOR  = 1
-RIGHT_SENSOR = 2
-
-trig_arr = [15,13,32] #Trigピン番号(正面、左、右)
-echo_arr = [26,24,31] #Echoピン番号(正面、左、右)
-
-LR_DIFF = 20
-
-
+rpi = RaspberryPiController()
 pwm = Adafruit_PCA9685.PCA9685(address=0x40)
 pwm.set_pwm_freq(60)
 
-# GPIOピン番号の指示方法
-GPIO.setmode(GPIO.BOARD)
-#超音波センサ初期設定
-for i in range(len(trig_arr)):
-    GPIO.setup(trig_arr[i],GPIO.OUT,initial=GPIO.LOW)
-    GPIO.setup(echo_arr[i],GPIO.IN)
 
 pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
 pwm.set_pwm(SPEED, 0, PWM_STOP)
@@ -95,34 +80,6 @@ signal.signal(signal.SIGINT, sigint_handler)
 signal.signal(signal.SIGQUIT, sigquit_handler)
 signal.signal(signal.SIGILL, sigill_handler)
 
-import numpy as np
-
-LR_DIFF = 0
-
-
-
-def Measure(trig, echo):
-    sigon  = 0 #Echoピンの電圧が0V→3.3Vに変わった時間を記録する変数
-    sigoff = 0 #Echoピンの電圧が3.3V→0Vに変わった時間を記録する変数
-    GPIO.output(trig,GPIO.HIGH) #Trigピンの電圧をHIGH(3.3V)にする
-    time.sleep(0.00001) #10μs待つ
-    GPIO.output(trig,GPIO.LOW) #Trigピンの電圧をLOW(0V)にする
-    while(GPIO.input(echo) == GPIO.LOW):
-        sigon = time.time() #Echoピンの電圧がHIGH(3.3V)になるまで、sigonを更新
-    while(GPIO.input(echo) == GPIO.HIGH):
-        sigoff = time.time() #Echoピンの電圧がLOW(0V)になるまで、sigoffを更新
-    distance = (sigoff - sigon)*34000/2 #距離を計算(単位はcm)
-    if 200 < distance:
-        distance = 200 #距離が200cm以上の場合は200cmを返す
-    return int(distance / 20)
-
-def get_state():
-    time.sleep(0.01)
-    d_fr = Measure(trig_arr[FRONT_SENSOR],echo_arr[FRONT_SENSOR])
-    d_lh = Measure(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
-    d_rh = Measure(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
-    state = (d_fr, d_lh, d_rh)
-    return state
 
 def get_reward(state, next_state, action):
     if next_state[0] == 0:
@@ -151,28 +108,22 @@ def simulate_environment(state, action):
     elif (action == "Left"):
         pwm.set_pwm(SERVO, 0, PWM_LEFT)
         pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
-    next_state = get_state()
+    next_state = rpi.get_state()
     reward = get_reward(state, next_state, action)
     return reward, next_state
 
 # Q学習の更新
-
-d_fr = Measure(trig_arr[FRONT_SENSOR],echo_arr[FRONT_SENSOR])
-d_lh = Measure(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
-d_rh = Measure(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
-state = (d_fr, d_lh, d_rh)
+state = rpi.get_state()
 while True:
     action = agent.get_action(state)
-
     reward, next_state = simulate_environment(state, action)
-
     # Q値の更新
     if (sig_flag == 1):
         sig_flag = 0
-        state = (d_fr, d_lh, d_rh)
+        state = rpi.get_state()
         continue
-    agent.learn(state, action, reward, next_state)
 
+    agent.learn(state, action, reward, next_state)
     state = next_state
 
 #超音波センサーで距離を測る関数
