@@ -1,12 +1,14 @@
 import numpy as np
 import random
 
+STEPS = 11
+
 class QLearningAgent:
     #lernen_rate:学習率 学習率が大きいと，Q値の更新量が大きくなる
     #discount_factor:割引率γ γが大きいと，長期的な報酬を重視する
     #epsilon:ε-greedy法のε εの確率でランダムに行動する
-    def __init__(self, actions, states, q_table_path, learning_rate=0.1, discount_factor=0.9, epsilon=0.5):
-        self.actions = actions
+    def __init__(self, q_table_path, learning_rate=0.1, discount_factor=0.9, epsilon=0.5):
+        self.actions = ["Forward", "Left", "Right"]
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor
         self.epsilon = epsilon
@@ -15,20 +17,20 @@ class QLearningAgent:
         # 例えば，action = "Forward"のとき，action_index[action] = 0
         # 例えば，state = (2, 4, 1)のとき，state_index[state] = 241
         # このインデックスを使うことで，Q-tableを高速にアクセスできる
-        self.action_index = {action: i for i, action in enumerate(actions)}
-        self.state_index = {state: i for i, state in enumerate(states)}
+        self.action_index = {action: i for i, action in enumerate(self.actions)}
+        self.state_index = {state: i for i, state in enumerate([(d1, d2, d3) for d1 in range(STEPS) for d2 in range(STEPS) for d3 in range(STEPS)])}
 
         # ファイルが存在する場合は，そのファイルを読み込む
         try:
             self.q_table = np.loadtxt(q_table_path, delimiter=",")
             # ファイルの中身の形が正しいかどうかチェック
-            expected_shape = (len(states), len(actions))
+            expected_shape = (STEPS * STEPS * STEPS, len(self.actions))
             if self.q_table.shape != expected_shape:
                 print(f"Warning: Loaded q_table has shape {self.q_table.shape}, but expected {expected_shape}. Reinitializing q_table.")
                 self.q_table = np.zeros(expected_shape)
         # Q-tableをstate数(前のあり得る長さ*左のあり得る長さ*右のあり得る長さ)×action数(前に進む+左に曲がる+右に曲がる)の大きさで初期化
         except:
-            self.q_table = np.zeros((len(states), len(actions)))
+            self.q_table = np.zeros((STEPS * STEPS * STEPS, len(self.actions)))
 
     # εの確率でランダムに行動する
     def get_action(self, state):
@@ -63,18 +65,14 @@ class QLearningAgent:
         np.savetxt(file_name, self.q_table, delimiter=",")
 
 
-# # テスト用／使用例
+# テスト用／使用例
 # Q_TABLE_PATH = "test.csv"
-# actions = ["Forward", "Left", "Right"]
-# action_index = {action: i for i, action in enumerate(actions)}
-# states = [(d1, d2, d3) for d1 in range(11) for d2 in range(11) for d3 in range(11)]
-# state_index = {state: i for i, state in enumerate(states)}
+# agent = QLearningAgent(Q_TABLE_PATH)
 
-# agent = QLearningAgent(actions, states, Q_TABLE_PATH)
-# state = (0,0,0)
+# state = (0,0,1)
 # action = agent.get_action(state)
 # reward = 1000
-# next_state = (0,0,1)
+# next_state = (0,0,2)
 # agent.learn(state, action, reward, next_state)
 
 # agent.save_q_table(Q_TABLE_PATH)

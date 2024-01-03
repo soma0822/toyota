@@ -26,6 +26,9 @@ PWM_LEFT     = 290
 PWM_STRAIGHT = 340
 PWM_RIGHT    = 390
 
+
+Q_TABLE_PATH = "test.csv"
+agent = QLearningAgent(Q_TABLE_PATH)
 rpi = RaspberryPiController()
 pwm = Adafruit_PCA9685.PCA9685(address=0x40)
 pwm.set_pwm_freq(60)
@@ -36,16 +39,6 @@ pwm.set_pwm(SPEED, 0, PWM_STOP)
 
 sig = 0
 sig_flag = 0
-
-Q_TABLE_PATH = "test.csv"
-actions = ["Forward", "Left", "Right"]
-action_index = {action: i for i, action in enumerate(actions)}
-
-states = [(d1, d2, d3) for d1 in range(11) for d2 in range(11) for d3 in range(11)]
-state_index = {state: i for i, state in enumerate(states)}
-
-agent = QLearningAgent(actions, states, Q_TABLE_PATH)
-
 
 def sigint_handler(signum, frame):
     global sig
