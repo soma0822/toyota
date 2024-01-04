@@ -5,6 +5,8 @@ import sys
 
 from q_learning.q_learning_agent import QLearningAgent
 from raspberry_pi_controller import RaspberryPiController
+sys.path.append('../')
+from signalHandler import SignalHandler
 
 # pin number
 SPEED = 13
@@ -35,38 +37,7 @@ pwm.set_pwm_freq(60)
 pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
 pwm.set_pwm(SPEED, 0, PWM_STOP)
 
-sig = 0
-sig_flag = 0
-
-def sigint_handler(signum, frame):
-    global sig
-    pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
-    # タイヤを停止させる
-    pwm.set_pwm(SPEED, 0, PWM_STOP)
-    while True:
-        time.sleep(1)
-        if sig == 1:
-            break
-    sig = 0
-
-def sigquit_handler(signum, frame):
-    global sig
-    global sig_flag
-    sig = 1
-    sig_flag = 1
-
-def sigill_handler(signum, frame):
-    pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
-    # タイヤを停止させる
-    pwm.set_pwm(SPEED, 0, PWM_STOP)
-    # Qテーブルを保存
-    agent.save_q_table(Q_TABLE_PATH)
-    rpi.cleanup()
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, sigint_handler)
-signal.signal(signal.SIGQUIT, sigquit_handler)
-signal.signal(signal.SIGILL, sigill_handler)
+sig = SignalHandler(pwm)
 
 def get_reward(state, next_state, action):
     if next_state[0] == 0:
