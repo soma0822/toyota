@@ -7,7 +7,7 @@ import signal
 import sys
 import csv
 
-from q_learning_agent import QLearningAgent
+from q_learning.q_learning_agent import QLearningAgent
 
 # pin number
 SPEED = 13
