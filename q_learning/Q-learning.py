@@ -61,6 +61,7 @@ def sigill_handler(signum, frame):
     pwm.set_pwm(SPEED, 0, PWM_STOP)
     # Qテーブルを保存
     agent.save_q_table(Q_TABLE_PATH)
+    rpi.cleanup()
     sys.exit(0)
 
 signal.signal(signal.SIGINT, sigint_handler)

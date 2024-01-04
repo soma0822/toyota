@@ -49,5 +49,9 @@ class RaspberryPiController:
     def set_speed(self, value):
         # スピードの制御
         pass
+    
+    def stop(self):
+        GPIO.cleanup()
+    # GPIOの解放
 
     # その他の必要なメソッド...
