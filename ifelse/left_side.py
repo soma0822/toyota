@@ -3,7 +3,8 @@ import time  #timeというモジュールを使用する
 import RPi.GPIO as GPIO #ラズパイのGPIOピンを操作するためのモジュール
 from datetime import datetime #日時を取得するためのモジュール
 import os #ファイル操作のためのモジュール
-
+import sys
+sys.path.append('../')
 from signalHandler import SignalHandler
 
 # pin number
@@ -15,8 +16,8 @@ SERVO = 14
 # MAX = 350
 # MIN = 369
 PWM_FORWARD_MAX = 363
-PWM_FORWARD_MID = 365
-PWM_FORWARD_MIN = 365
+PWM_FORWARD_MID = 363
+PWM_FORWARD_MIN = 363
 PWM_STOP        = 380
 PWM_BACK        = 395
 
@@ -165,7 +166,7 @@ def Cntl(d_fr, d_lh, d_rh):
         #         pwm.set_pwm(SPEED, 0, PWM_FORWARD_MID)
         #     else :
         #         pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
-        if d_lh > 140 or d_rh < 20:
+        if d_lh > 140 or d_rh < 30:
             Log('左に曲がる', d_fr, d_lh, d_rh)
             # 前輪を左に向ける
             pwm.set_pwm(SERVO, 0, PWM_LEFT)
