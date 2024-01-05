@@ -3,9 +3,6 @@ import time  #timeというモジュールを使用する
 import RPi.GPIO as GPIO #ラズパイのGPIOピンを操作するためのモジュール
 from datetime import datetime #日時を取得するためのモジュール
 import os #ファイル操作のためのモジュール
-import sys
-sys.path.append('../')
-from signalHandler import SignalHandler
 
 # pin number
 SPEED = 13
@@ -15,7 +12,7 @@ SERVO = 14
 # pwm.set_pwm(SPEED_CNTL, 0, 380)
 # MAX = 350
 # MIN = 369
-PWM_FORWARD_MAX = 363
+PWM_FORWARD_MAX = 364
 PWM_FORWARD_MID = 363
 PWM_FORWARD_MIN = 363
 PWM_STOP        = 380
@@ -37,44 +34,8 @@ echo_arr = [26,24,31] #Echoピン番号(正面、左、右)
 
 LR_DIFF = 20
 
-
-# sig = 0
-# sig_flag = 0
-
-# def sigint_handler(signum, frame):
-#     global sig
-#     pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
-#     # タイヤを停止させる
-#     pwm.set_pwm(SPEED, 0, PWM_STOP)
-#     while True:
-#         time.sleep(1)
-#         if sig == 1:
-#             break
-#     sig = 0
-
-# def sigquit_handler(signum, frame):
-#     global sig
-#     global sig_flag
-#     sig = 1
-#     sig_flag = 1
-
-# def sigill_handler(signum, frame):
-#     pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
-#     # タイヤを停止させる
-#     pwm.set_pwm(SPEED, 0, PWM_STOP)
-#     # Qテーブルを保存
-#     GPIO.cleanup()
-#     # GPIOの解放
-#     sys.exit(0)
-
-# signal.signal(signal.SIGINT, sigint_handler)
-# signal.signal(signal.SIGQUIT, sigquit_handler)
-# signal.signal(signal.SIGILL, sigill_handler)
-
 pwm = Adafruit_PCA9685.PCA9685(address=0x40)
 pwm.set_pwm_freq(60)
-
-sig = SignalHandler(pwm)
 
 # GPIOピン番号の指示方法
 GPIO.setmode(GPIO.BOARD)
@@ -198,9 +159,4 @@ while True:  #以下の部分をずっと繰り返す
     d_rh = Measure(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
     
     Cntl(d_fr, d_lh, d_rh)
-
-# 12/27記録
-# 32.65
-# 32.38
-# 31.82
-
+    # time.sleep(0.05)
