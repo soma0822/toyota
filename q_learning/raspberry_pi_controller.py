@@ -34,7 +34,7 @@ class RaspberryPiController:
         return int(distance / 20)
 
     def get_state(self):
-        time.sleep(0.01)
+        # time.sleep(0.01)
         d_fr = self.measure_distance(trig_arr[FRONT_SENSOR],echo_arr[FRONT_SENSOR])
         d_lh = self.measure_distance(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
         d_rh = self.measure_distance(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])

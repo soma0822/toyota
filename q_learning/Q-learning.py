@@ -3,10 +3,8 @@ import time  #timeというモジュールを使用する
 import signal
 import sys
 
-from q_learning.q_learning_agent import QLearningAgent
+from q_learning_agent import QLearningAgent
 from raspberry_pi_controller import RaspberryPiController
-sys.path.append('../')
-from signalHandler import SignalHandler
 
 # pin number
 SPEED = 13
@@ -36,8 +34,6 @@ pwm.set_pwm_freq(60)
 
 pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
 pwm.set_pwm(SPEED, 0, PWM_STOP)
-
-sig = SignalHandler(pwm)
 
 def get_reward(state, next_state, action):
     if next_state[0] == 0:
@@ -75,15 +71,21 @@ def simulate_environment(state, action):
 
 state = rpi.get_state()
 while True:
-    action = agent.get_action(state)
-    reward, next_state = simulate_environment(state, action)
-    # Q値の更新
-    if (sig_flag == 1):
-        sig_flag = 0
-        state = rpi.get_state()
-        continue
-    agent.learn(state, action, reward, next_state)
-    state = next_state
+    try:
+        action = agent.get_action(state)
+        reward, next_state = simulate_environment(state, action)
+        # Q値の更新
+        if (sig_flag == 1):
+            sig_flag = 0
+            state = rpi.get_state()
+            continue
+        agent.learn(state, action, reward, next_state)
+        state = next_state
+    except KeyboardInterrupt:
+        pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
+        pwm.set_pwm(SPEED, 0, PWM_STOP)
+        rpi.stop()
+        sys.exit(0)
 
 #超音波センサーで距離を測る関数
 
