@@ -1,6 +1,5 @@
 import Adafruit_PCA9685
 import time  #timeというモジュールを使用する
-import signal
 import sys
 
 from q_learning_agent import QLearningAgent
@@ -48,7 +47,7 @@ def get_reward(state, next_state, action):
         return 2
     elif action == "Left":
         return 1
-    
+
 
 # シミュレーション上での報酬と次の状態の仮定
 def simulate_environment(state, action):
@@ -75,10 +74,6 @@ while True:
         action = agent.get_action(state)
         reward, next_state = simulate_environment(state, action)
         # Q値の更新
-        if (sig_flag == 1):
-            sig_flag = 0
-            state = rpi.get_state()
-            continue
         agent.learn(state, action, reward, next_state)
         state = next_state
     except KeyboardInterrupt:
