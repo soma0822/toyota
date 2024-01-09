@@ -4,6 +4,7 @@ import sys
 
 from q_learning_agent import QLearningAgent
 from raspberry_pi_controller import RaspberryPiController
+from feedback_server import FeedbackServer
 
 # pin number
 SPEED = 13
@@ -25,6 +26,8 @@ PWM_LEFT     = 290
 PWM_STRAIGHT = 340
 PWM_RIGHT    = 390
 
+feedback_server = FeedbackServer()
+feedback_server.start_listening()
 Q_TABLE_PATH = "test.csv"
 agent = QLearningAgent(Q_TABLE_PATH)
 rpi = RaspberryPiController()
@@ -35,19 +38,33 @@ pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
 pwm.set_pwm(SPEED, 0, PWM_STOP)
 
 def get_reward(state, next_state, action):
-    if next_state[0] == 0:
-        return -10
-    elif next_state[1] < 3 and next_state[1] < state[1]:
-        return -5
-    elif next_state[2] < 2 and next_state[2] < state[2]:
-        return -5
-    elif action == "Forward":
-        return 3
-    elif action == "Right":
-        return 2
-    elif action == "Left":
-        return 1
+    # 定数定義
+    TIME_PENALTY = -0.01  # 時間経過に対する負の報酬
+    COLLISION_PENALTY = -0.5  # 衝突に対する負の報酬
+    GOOD_ACTION_REWARD = 0.5  # ゴールや素晴らしい行動に対する正の報酬
+    BAD_ACTION_PENALTY = -1  # 悪い行動に対する負の報酬
 
+    reward = 0
+
+    reward += TIME_PENALTY
+
+    feedback = feedback_server.get_feedback()
+    if feedback == 1:
+        print("good action!")
+        reward += GOOD_ACTION_REWARD
+    elif feedback == -1:
+        print("bad action!")
+        reward += BAD_ACTION_PENALTY
+
+    if next_state[0] == 0:
+        reward += COLLISION_PENALTY
+    elif next_state[1] < 3 and next_state[1] < state[1]:
+        reward += COLLISION_PENALTY / 2
+    elif next_state[2] < 2 and next_state[2] < state[2]:
+        reward += COLLISION_PENALTY / 2
+    else:
+        reward += 0.1
+    return reward
 
 # シミュレーション上での報酬と次の状態の仮定
 def simulate_environment(state, action):
