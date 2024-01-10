@@ -26,6 +26,10 @@ PWM_LEFT     = 290
 PWM_STRAIGHT = 340
 PWM_RIGHT    = 390
 
+D_FR = 0
+D_LH = 1
+D_RH = 2
+
 feedback_server = FeedbackServer()
 feedback_server.start_listening()
 Q_TABLE_PATH = "test.csv"
@@ -58,10 +62,16 @@ def get_reward(state, next_state, action):
 
     if next_state[0] == 0:
         reward += COLLISION_PENALTY
-    elif next_state[1] < 3 and next_state[1] < state[1]:
-        reward += COLLISION_PENALTY / 2
-    elif next_state[2] < 2 and next_state[2] < state[2]:
-        reward += COLLISION_PENALTY / 2
+    elif next_state[0] < 5 and next_state[0] < state[0]:
+        reward += COLLISION_PENALTY
+    elif next_state[1] < 3:
+        if next_state[1] < state[1]:
+            reward += COLLISION_PENALTY
+        elif next_state[1] > state[1]:
+            reward += 0.3
+    elif next_state[2] < 2:
+        if next_state[2] < state[2]:
+            reward += COLLISION_PENALTY
     else:
         reward += 0.1
     return reward
@@ -78,9 +88,7 @@ def simulate_environment(state, action):
     elif (action == "Left"):
         pwm.set_pwm(SERVO, 0, PWM_LEFT)
         pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
-    next_state = rpi.get_state()
-    reward = get_reward(state, next_state, action)
-    return reward, next_state
+    return
 
 # Q学習の更新
 
@@ -88,15 +96,22 @@ def simulate_environment(state, action):
 state = rpi.get_state()
 while True:
     try:
-        action = agent.get_action(state)
-        reward, next_state = simulate_environment(state, action)
-        # Q値の更新
+        if state[D_FR] <= 2 or state[D_LH] <= 0 or state[D_RH] <= 0:
+            # Log('判断：止まる', d_fr, d_lh, d_rh)
+            pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
+            pwm.set_pwm(SPEED, 0, PWM_STOP)
+        else:
+            action = agent.get_action(state)
+            simulate_environment(state, action)
+
+        next_state = rpi.get_state()
+        reward = get_reward(state, next_state, action)
         agent.learn(state, action, reward, next_state)
         state = next_state
     except KeyboardInterrupt:
         pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
         pwm.set_pwm(SPEED, 0, PWM_STOP)
-        agent.save_q_table(Q_TABLE_PATH)
+        agent.save_q_table("test.csv")
         rpi.stop()
         sys.exit(0)
 
