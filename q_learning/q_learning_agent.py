@@ -59,6 +59,7 @@ class QLearningAgent:
         # 今回の行動がどれだけ正しいかを再計算した値q_targetと，元々のq_tableの値q_predictの差分をとって，q値を更新する
         # q_targetがより大きければ，少しだけq値は大きくなる
         self.q_table[state_idx, action_idx] += self.learning_rate * (q_target - q_predict)
+        print(f"Updated q_table[{state}, {action}] from {q_predict} to {self.q_table[state_idx, action_idx]}")
 
     #q_tableを保存する
     def save_q_table(self, file_name):

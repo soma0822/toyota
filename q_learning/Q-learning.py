@@ -1,6 +1,8 @@
 import Adafruit_PCA9685
 import time  #timeというモジュールを使用する
 import sys
+import os
+from datetime import datetime
 
 from q_learning_agent import QLearningAgent
 from raspberry_pi_controller import RaspberryPiController
@@ -29,6 +31,50 @@ PWM_RIGHT    = 390
 D_FR = 0
 D_LH = 1
 D_RH = 2
+
+# logディレクトリが存在しない場合は作成する
+log_dir = "log"
+os.makedirs(log_dir, exist_ok=True)
+
+# ファイルに走行ログを書き込む
+current_time = datetime.now()
+formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+file_name = os.path.join(log_dir, f"output_{formatted_time}.txt")
+try:
+    f = open(file_name, 'w') # ファイルを開く
+except Exception as e:
+    print(f'Error opening file: {e}')
+    exit()
+
+ftext = 'a'
+logTime = time.time()
+
+environment = 1 # 0:本番環境, 1:テスト環境（ログが出る）
+
+if environment == 1:
+    def Log(text, d_fr, d_lh, d_rh):
+        global ftext
+        if ftext != text:
+            ftext = text
+            try:
+                print('\n================')
+                f.write('\n================\n')
+                print('{:.1f} 秒\n'.format(time.time() - logTime))
+                f.write('{:.1f} 秒\n'.format(time.time() - logTime))
+                print('正面の壁との距離 {:.1f} cm'.format(d_fr)) #距離を表示する
+                print('左の壁との距離 {:.1f} cm'.format(d_lh)) #距離を表示する
+                print('右の壁との距離 {:.1f} cm'.format(d_rh)) #距離を表示する
+                f.write('正面の壁との距離 {:.1f} cm\n'.format(d_fr)) #距離を表示する
+                f.write('左の壁との距離 {:.1f} cm\n'.format(d_lh)) #距離を表示する
+                f.write('右の壁との距離 {:.1f} cm\n'.format(d_rh)) #距離を表示する
+                print(text)
+                f.write(text + "\n")
+                f.flush()  # バッファをフラッシュして即座に書き込む
+            except Exception as e:
+                print(f'Error writing to file: {e}')
+else:
+    def Log(text, d_fr, d_lh, d_rh):
+        return
 
 feedback_server = FeedbackServer()
 feedback_server.start_listening()
@@ -97,15 +143,18 @@ state = rpi.get_state()
 while True:
     try:
         if state[D_FR] <= 2 or state[D_LH] <= 0 or state[D_RH] <= 0:
-            # Log('判断：止まる', d_fr, d_lh, d_rh)
+            Log('STOP', state[D_FR], state[D_LH], state[D_RH])
             pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
             pwm.set_pwm(SPEED, 0, PWM_STOP)
         else:
             action = agent.get_action(state)
             simulate_environment(state, action)
+            Log(action, state[D_FR], state[D_LH], state[D_RH])
 
         next_state = rpi.get_state()
+        Log(f"Next state: {next_state}", state[D_FR], state[D_LH], state[D_RH])
         reward = get_reward(state, next_state, action)
+        Log(f"Reward: {reward}", state[D_FR], state[D_LH], state[D_RH])
         agent.learn(state, action, reward, next_state)
         state = next_state
     except KeyboardInterrupt:
