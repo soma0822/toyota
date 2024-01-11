@@ -34,12 +34,12 @@ class RaspberryPiController:
         while GPIO.input(echo) == GPIO.LOW:
             sigon = time.time()
             if sigon - start_time > timeout:
-                return 300  # タイムアウトの場合は-1を返す
+                return int(200 / 20)  # タイムアウトの場合は-1を返す
 
         while GPIO.input(echo) == GPIO.HIGH:
             sigoff = time.time()
             if sigoff - start_time > timeout:
-                return 300  # タイムアウトの場合は-1を返す
+                return int(200 / 20)  # タイムアウトの場合は-1を返す
 
         # 距離の計算
         duration = sigoff - sigon

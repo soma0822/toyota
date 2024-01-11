@@ -158,32 +158,35 @@ def measure_distance(sensor_id, trig, echo, state):
     while True:
         state[sensor_id] = rpi.measure_distance(trig, echo)
 
-state = (0, 0, 0)
+distance_arr = [0, 0, 0]
 
 for sensor_id in [0, 1, 2]:
-    threading.Thread(target=measure_distance, args=(sensor_id, trig_arr[sensor_id], echo_arr[sensor_id], state)).start()
+    threading.Thread(target=measure_distance, args=(sensor_id, trig_arr[sensor_id], echo_arr[sensor_id], distance_arr)).start()
 
+
+state = tuple(distance_arr)
 while True:
     try:
-        if state[D_FR] <= 2 or state[D_LH] <= 0 or state[D_RH] <= 0:
-            Log('STOP', state[D_FR], state[D_LH], state[D_RH])
+        if state[D_FR] <= 1 or state[D_LH] <= 0 or state[D_RH] <= 0:
             pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
             pwm.set_pwm(SPEED, 0, PWM_STOP)
+            Log('STOP', state[D_FR], state[D_LH], state[D_RH])
+            next_state = tuple(distance_arr)
         else:
             action = agent.get_action(state)
             simulate_environment(state, action)
             Log(action, state[D_FR], state[D_LH], state[D_RH])
-
-        next_state = rpi.get_state()
-        Log(f"Next state: {next_state}", state[D_FR], state[D_LH], state[D_RH])
-        reward = get_reward(state, next_state, action)
-        Log(f"Reward: {reward}", state[D_FR], state[D_LH], state[D_RH])
-        agent.learn(state, action, reward, next_state)
+            next_state = tuple(distance_arr)
+            Log(f"Next state: {next_state}", state[D_FR], state[D_LH], state[D_RH])
+            reward = get_reward(state, next_state, action)
+            Log(f"Reward: {reward}", state[D_FR], state[D_LH], state[D_RH])
+            agent.learn(state, action, reward, next_state)
+        
         state = next_state
     except KeyboardInterrupt:
         pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
         pwm.set_pwm(SPEED, 0, PWM_STOP)
-        agent.save_q_table("test.csv")
+        # agent.save_q_table("test.csv")
         rpi.stop()
         sys.exit(0)
 
