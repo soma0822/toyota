@@ -106,20 +106,31 @@ def get_reward(state, next_state, action):
         print("bad action!")
         reward += BAD_ACTION_PENALTY
 
-    if next_state[0] == 0:
+    if next_state[0] <= 1:
         reward += COLLISION_PENALTY
-    elif next_state[0] < 5 and next_state[0] < state[0]:
-        reward += COLLISION_PENALTY
-    elif next_state[1] < 3:
-        if next_state[1] < state[1]:
-            reward += COLLISION_PENALTY
-        elif next_state[1] > state[1]:
-            reward += 0.3
-    elif next_state[2] < 2:
-        if next_state[2] < state[2]:
-            reward += COLLISION_PENALTY
-    else:
-        reward += 0.1
+
+    if state[D_LH] <= state[D_RH] - 1:
+        if action  == "Right":
+            reward += 0.1
+        elif action == "Left":
+            reward += -0.1
+    if state[D_RH] <= 1:
+        if action == "Left":
+            reward += 0.1
+        elif action == "Right":
+            reward += -0.2
+    if state[D_FR] <= 1:
+        if action == "Forward":
+            reward += -0.2
+    if state[D_FR]  <= state[D_LH]:
+        if action == "Left":
+            reward += 0.2
+    if state[D_FR] <= state[D_RH]:
+        if action == "Right":
+            reward += 0.2
+    if state[D_FR] >= 8:
+        if action == "Forward":
+            reward += 0.05
     return reward
 
 # シミュレーション上での報酬と次の状態の仮定
