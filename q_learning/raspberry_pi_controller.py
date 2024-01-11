@@ -2,6 +2,11 @@
 import RPi.GPIO as GPIO
 import time
 
+# room temperature 
+T = 22 # °C
+# speed of sound at T 
+VS = 33150 + 61 * T # cm / s
+
 trig_arr = [15,13,32] #Trigピン番号(正面、左、右)
 echo_arr = [26,24,31] #Echoピン番号(正面、左、右)
 #上の配列でセンサーの位置を表すindex
@@ -18,19 +23,31 @@ class RaspberryPiController:
             GPIO.setup(trig_arr[i],GPIO.OUT,initial=GPIO.LOW)
             GPIO.setup(echo_arr[i],GPIO.IN)
 
-    def measure_distance(self, trig, echo):
+    def measure_distance(self, trig, echo, timeout=0.02):
         sigon  = 0 #Echoピンの電圧が0V→3.3Vに変わった時間を記録する変数
         sigoff = 0 #Echoピンの電圧が3.3V→0Vに変わった時間を記録する変数
         GPIO.output(trig,GPIO.HIGH) #Trigピンの電圧をHIGH(3.3V)にする
         time.sleep(0.00001) #10μs待つ
         GPIO.output(trig,GPIO.LOW) #Trigピンの電圧をLOW(0V)にする
-        while(GPIO.input(echo) == GPIO.LOW):
-            sigon = time.time() #Echoピンの電圧がHIGH(3.3V)になるまで、sigonを更新
-        while(GPIO.input(echo) == GPIO.HIGH):
-            sigoff = time.time() #Echoピンの電圧がLOW(0V)になるまで、sigoffを更新
-        distance = (sigoff - sigon)*34000/2 #距離を計算(単位はcm)
+        
+        start_time = time.time()
+        while GPIO.input(echo) == GPIO.LOW:
+            sigon = time.time()
+            if sigon - start_time > timeout:
+                return 300  # タイムアウトの場合は-1を返す
+
+        while GPIO.input(echo) == GPIO.HIGH:
+            sigoff = time.time()
+            if sigoff - start_time > timeout:
+                return 300  # タイムアウトの場合は-1を返す
+
+        # 距離の計算
+        duration = sigoff - sigon
+        distance = duration * VS / 2  # 音速を340m/sとして、距離（cm）を計算
+
         if 200 < distance:
-            distance = 200 #距離が200cm以上の場合は200cmを返す
+            distance = 200  # 距離が200cm以上の場合は200cmを返す
+
         return int(distance / 20)
 
     def get_state(self):

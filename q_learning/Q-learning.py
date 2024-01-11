@@ -150,7 +150,19 @@ def simulate_environment(state, action):
 # Q学習の更新
 
 
-state = rpi.get_state()
+import threading
+trig_arr = [15,13,32] #Trigピン番号(正面、左、右)
+echo_arr = [26,24,31] #Echoピン番号(正面、左、右)
+
+def measure_distance(sensor_id, trig, echo, state):
+    while True:
+        state[sensor_id] = rpi.measure_distance(trig, echo)
+
+state = (0, 0, 0)
+
+for sensor_id in [0, 1, 2]:
+    threading.Thread(target=measure_distance, args=(sensor_id, trig_arr[sensor_id], echo_arr[sensor_id], state)).start()
+
 while True:
     try:
         if state[D_FR] <= 2 or state[D_LH] <= 0 or state[D_RH] <= 0:
