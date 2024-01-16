@@ -14,7 +14,7 @@ FRONT_SENSOR = 0
 LEFT_SENSOR  = 1
 RIGHT_SENSOR = 2
 
-MAX_DISTNCE = 200
+MAX_DISTNCE = 180
 devider = 20
 
 class RaspberryPiController:
