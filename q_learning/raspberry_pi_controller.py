@@ -14,6 +14,9 @@ FRONT_SENSOR = 0
 LEFT_SENSOR  = 1
 RIGHT_SENSOR = 2
 
+MAX_DISTNCE = 200
+devider = 20
+
 class RaspberryPiController:
     def __init__(self):
         # GPIOピン番号の指示方法
@@ -34,21 +37,21 @@ class RaspberryPiController:
         while GPIO.input(echo) == GPIO.LOW:
             sigon = time.time()
             if sigon - start_time > timeout:
-                return int(200 / 20)  # タイムアウトの場合は-1を返す
+                return int(MAX_DISTNCE)  # タイムアウトの場合は-1を返す
 
         while GPIO.input(echo) == GPIO.HIGH:
             sigoff = time.time()
             if sigoff - start_time > timeout:
-                return int(200 / 20)  # タイムアウトの場合は-1を返す
+                return int(MAX_DISTNCE)  # タイムアウトの場合は-1を返す
 
         # 距離の計算
         duration = sigoff - sigon
         distance = duration * VS / 2  # 音速を340m/sとして、距離（cm）を計算
 
         if 200 < distance:
-            distance = 200  # 距離が200cm以上の場合は200cmを返す
+            distance = MAX_DISTNCE  # 距離が200cm以上の場合は200cmを返す
 
-        return int(distance / 20)
+        return int(distance)
 
     def get_state(self):
         # time.sleep(0.01)
@@ -56,7 +59,9 @@ class RaspberryPiController:
         d_lh = self.measure_distance(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
         d_rh = self.measure_distance(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
         state = (d_fr, d_lh, d_rh)
-        return state
+        print(state)
+        print(state / devider)
+        return state / devider
 
 
     def set_servo(self, value):
