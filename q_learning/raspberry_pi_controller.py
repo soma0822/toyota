@@ -58,10 +58,14 @@ class RaspberryPiController:
         d_fr = self.measure_distance(trig_arr[FRONT_SENSOR],echo_arr[FRONT_SENSOR])
         d_lh = self.measure_distance(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
         d_rh = self.measure_distance(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
-        state = (d_fr, d_lh, d_rh)
+        state = [d_fr, d_lh, d_rh]
         print(state)
-        print(state / devider)
-        return state / devider
+
+        # 各値を devider で割る
+        state_divided = [value / devider for value in state]
+        print(state_divided)
+        state_tuple = tuple(state_divided)
+        return state_tuple
 
 
     def set_servo(self, value):
