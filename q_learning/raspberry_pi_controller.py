@@ -66,7 +66,7 @@ class RaspberryPiController:
         print(state)
 
         # 各値を devider で割る
-        state_divided = [value / devider for value in state]
+        state_divided = [int(value / devider) for value in state]
         print(state_divided)
         state_tuple = tuple(state_divided)
         return state_tuple
