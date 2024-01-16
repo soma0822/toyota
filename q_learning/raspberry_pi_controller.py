@@ -63,11 +63,11 @@ class RaspberryPiController:
         d_lh_rounded = (d_lh // 2) * 2
         d_rh_rounded = (d_rh // 2) * 2
         state = [d_fr_rounded, d_lh_rounded, d_rh_rounded]
-        print(state)
+        print("state is ", state)
 
         # 各値を devider で割る
         state_divided = [int(value / devider) for value in state]
-        print(state_divided)
+        print("state_divided is ", state_divided)
         state_tuple = tuple(state_divided)
         return state_tuple
 
