@@ -58,7 +58,11 @@ class RaspberryPiController:
         d_fr = self.measure_distance(trig_arr[FRONT_SENSOR],echo_arr[FRONT_SENSOR])
         d_lh = self.measure_distance(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
         d_rh = self.measure_distance(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
-        state = [d_fr, d_lh, d_rh]
+
+        d_fr_rounded = (d_fr // 2) * 2
+        d_lh_rounded = (d_lh // 2) * 2
+        d_rh_rounded = (d_rh // 2) * 2
+        state = [d_fr_rounded, d_lh_rounded, d_rh_rounded]
         print(state)
 
         # 各値を devider で割る
