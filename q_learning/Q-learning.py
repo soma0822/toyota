@@ -150,33 +150,33 @@ def simulate_environment(state, action):
 # Q学習の更新
 
 
-import threading
-trig_arr = [15,13,32] #Trigピン番号(正面、左、右)
-echo_arr = [26,24,31] #Echoピン番号(正面、左、右)
+# import threading
+# trig_arr = [15,13,32] #Trigピン番号(正面、左、右)
+# echo_arr = [26,24,31] #Echoピン番号(正面、左、右)
 
-def measure_distance(sensor_id, trig, echo, state):
-    while True:
-        state[sensor_id] = rpi.measure_distance(trig, echo)
+# def measure_distance(sensor_id, trig, echo, state):
+#     while True:
+#         state[sensor_id] = rpi.measure_distance(trig, echo)
 
-distance_arr = [0, 0, 0]
+# distance_arr = [0, 0, 0]
 
-for sensor_id in [0, 1, 2]:
-    threading.Thread(target=measure_distance, args=(sensor_id, trig_arr[sensor_id], echo_arr[sensor_id], distance_arr)).start()
+# for sensor_id in [0, 1, 2]:
+#     threading.Thread(target=measure_distance, args=(sensor_id, trig_arr[sensor_id], echo_arr[sensor_id], distance_arr)).start()
 
 
-state = tuple(distance_arr)
+state = rpi.get_state()
 while True:
     try:
         if state[D_FR] <= 1 or state[D_LH] <= 0 or state[D_RH] <= 0:
             pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
             pwm.set_pwm(SPEED, 0, PWM_STOP)
             Log('STOP', state[D_FR], state[D_LH], state[D_RH])
-            next_state = tuple(distance_arr)
+            next_state = rpi.get_state()
         else:
             action = agent.get_action(state)
             simulate_environment(state, action)
             Log(action, state[D_FR], state[D_LH], state[D_RH])
-            next_state = tuple(distance_arr)
+            next_state = rpi.get_state()
             Log(f"Next state: {next_state}", state[D_FR], state[D_LH], state[D_RH])
             reward = get_reward(state, next_state, action)
             Log(f"Reward: {reward}", state[D_FR], state[D_LH], state[D_RH])
