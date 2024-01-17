@@ -1,6 +1,5 @@
 import numpy as np
 import random
-
 from itertools import product
 
 STEPS = 181
