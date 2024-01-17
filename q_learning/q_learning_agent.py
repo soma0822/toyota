@@ -28,7 +28,8 @@ class QLearningAgent:
         try:
             self.q_table = np.loadtxt(q_table_path, delimiter=",")
             # ファイルの中身の形が正しいかどうかチェック
-            expected_shape = (STEPS * STEPS * STEPS, len(self.actions))
+            len_one_dir = (STEPS // 2) + 1
+            expected_shape = (len_one_dir * len_one_dir * len_one_dir, len(self.actions))
             if self.q_table.shape != expected_shape:
                 print(f"Warning: Loaded q_table has shape {self.q_table.shape}, but expected {expected_shape}. Reinitializing q_table.")
                 self.q_table = np.zeros(expected_shape)
@@ -47,7 +48,9 @@ class QLearningAgent:
     def get_best_action(self, state):
         state_idx = self.state_index[state]
         action_values = self.q_table[state_idx]
+        print(f"Q-values for state {state}: {action_values}")
         max_action_idx = np.argmax(action_values)
+        print(f"Best action index: {max_action_idx}")
         return self.actions[max_action_idx]
 
     def learn(self, state, action, reward, next_state):
@@ -72,8 +75,10 @@ class QLearningAgent:
 # テスト用／使用例
 # Q_TABLE_PATH = "test.csv"
 
-# state = (0,0,1)
+# agent = QLearningAgent(Q_TABLE_PATH)
+# state = (60,100,70)
 # action = agent.get_action(state)
+# print(f"Taking action: {action}")
 # reward = 1000
 # next_state = (0,0,2)
 # agent.learn(state, action, reward, next_state)
