@@ -14,7 +14,7 @@ FRONT_SENSOR = 0
 LEFT_SENSOR  = 1
 RIGHT_SENSOR = 2
 
-MAX_DISTNCE = 180
+MAX_DISTANCE = 180
 devider = 20
 
 class RaspberryPiController:
@@ -37,19 +37,19 @@ class RaspberryPiController:
         while GPIO.input(echo) == GPIO.LOW:
             sigon = time.time()
             if sigon - start_time > timeout:
-                return int(MAX_DISTNCE)  # タイムアウトの場合は-1を返す
+                return int(MAX_DISTANCE)  # タイムアウトの場合は-1を返す
 
         while GPIO.input(echo) == GPIO.HIGH:
             sigoff = time.time()
             if sigoff - start_time > timeout:
-                return int(MAX_DISTNCE)  # タイムアウトの場合は-1を返す
+                return int(MAX_DISTANCE)  # タイムアウトの場合は-1を返す
 
         # 距離の計算
         duration = sigoff - sigon
         distance = duration * VS / 2  # 音速を340m/sとして、距離（cm）を計算
 
-        if 200 < distance:
-            distance = MAX_DISTNCE  # 距離が200cm以上の場合は200cmを返す
+        if MAX_DISTANCE < distance:
+            distance = MAX_DISTANCE  # 距離が200cm以上の場合は200cmを返す
 
         return int(distance)
 
