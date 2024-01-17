@@ -167,7 +167,7 @@ def simulate_environment(state, action):
 state = rpi.get_state()
 while True:
     try:
-        if state[D_FR] <= 1 or state[D_LH] <= 0 or state[D_RH] <= 0:
+        if state[D_FR] <= 20 or state[D_LH] <= 10 or state[D_RH] <= 10:
             pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
             pwm.set_pwm(SPEED, 0, PWM_STOP)
             Log('STOP', state[D_FR], state[D_LH], state[D_RH])
