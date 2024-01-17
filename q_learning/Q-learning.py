@@ -16,9 +16,9 @@ SERVO = 14
 # pwm.set_pwm(SPEED_CNTL, 0, 380)
 # MAX = 350
 # MIN = 369
-PWM_FORWARD_MAX = 363
-PWM_FORWARD_MID = 365
-PWM_FORWARD_MIN = 365
+PWM_FORWARD_MAX = 360
+PWM_FORWARD_MID = 362
+PWM_FORWARD_MIN = 364
 PWM_STOP        = 380
 PWM_BACK        = 395
 
@@ -138,13 +138,13 @@ def simulate_environment(state, action):
 
     if (action == "Forward"):
         pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
-        pwm.set_pwm(SPEED, 0, PWM_FORWARD_MID)
+        pwm.set_pwm(SPEED, 0, PWM_FORWARD_MAX)
     elif (action == "Right"):
         pwm.set_pwm(SERVO, 0, PWM_RIGHT)
-        pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
+        pwm.set_pwm(SPEED, 0, PWM_FORWARD_MID)
     elif (action == "Left"):
         pwm.set_pwm(SERVO, 0, PWM_LEFT)
-        pwm.set_pwm(SPEED, 0, PWM_FORWARD_MIN)
+        pwm.set_pwm(SPEED, 0, PWM_FORWARD_MID)
     return
 
 # Q学習の更新
