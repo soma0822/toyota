@@ -3,6 +3,7 @@ import random
 from itertools import product
 
 STEPS = 181
+RESOLUTION = 2
 
 class QLearningAgent:
     #lernen_rate:学習率 学習率が大きいと，Q値の更新量が大きくなる
@@ -20,7 +21,7 @@ class QLearningAgent:
         # このインデックスを使うことで，Q-tableを高速にアクセスできる
         self.action_index = {action: i for i, action in enumerate(self.actions)}
 
-        even_combinations = list(product(range(0, STEPS, 2), repeat=3))
+        even_combinations = list(product(range(0, STEPS, RESOLUTION), repeat=3))
         self.state_index = {state: i for i, state in enumerate(even_combinations)}
 
 
