@@ -7,6 +7,7 @@ from datetime import datetime
 from q_learning_agent import QLearningAgent
 from raspberry_pi_controller import RaspberryPiController
 from feedback_server import FeedbackServer
+import keyboard
 
 # pin number
 SPEED = 13
@@ -87,12 +88,14 @@ pwm.set_pwm_freq(60)
 pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
 pwm.set_pwm(SPEED, 0, PWM_STOP)
 
+TIME_PENALTY = -0.01  # 時間経過に対する負の報酬
+COLLISION_PENALTY = -2  # 衝突に対する負の報酬
+GOOD_ACTION_REWARD = 1  # ゴールや素晴らしい行動に対する正の報酬
+BAD_ACTION_PENALTY = -1  # 悪い行動に対する負の報酬
+
 def get_reward(state, next_state, action):
     # 定数定義
-    TIME_PENALTY = -0.01  # 時間経過に対する負の報酬
-    COLLISION_PENALTY = -0.5  # 衝突に対する負の報酬
-    GOOD_ACTION_REWARD = 0.5  # ゴールや素晴らしい行動に対する正の報酬
-    BAD_ACTION_PENALTY = -1  # 悪い行動に対する負の報酬
+    
 
     reward = 0
 
@@ -106,35 +109,28 @@ def get_reward(state, next_state, action):
         print("bad action!")
         reward += BAD_ACTION_PENALTY
 
-    if next_state[0] <= 1:
-        reward += COLLISION_PENALTY
-
-    if state[D_LH] <= state[D_RH] - 1:
-        if action  == "Right":
-            reward += 0.1
-        elif action == "Left":
-            reward += -0.1
-    if state[D_RH] <= 1:
+    if state[D_RH] <= 10:
         if action == "Left":
-            reward += 0.1
+            reward += 0.5
         elif action == "Right":
-            reward += -0.2
-    if state[D_FR] <= 1:
+            reward += -1
+    if state[D_FR] <= 20:
         if action == "Forward":
-            reward += -0.2
+            reward += -1
     if state[D_FR]  <= state[D_LH]:
         if action == "Left":
-            reward += 0.2
+            reward += 0.5
     if state[D_FR] <= state[D_RH]:
         if action == "Right":
-            reward += 0.2
-    if state[D_FR] >= 8:
+            reward += 0.5
+    if state[D_FR] >= 100:
         if action == "Forward":
-            reward += 0.05
+            reward += 0.5
+    if state[D_FR] >= 40 and state[D_LH] >= 40 and state[D_RH] >= 40:
+            reward += 0.2
     return reward
 
-# シミュレーション上での報酬と次の状態の仮定
-def simulate_environment(state, action):
+def act(action):
 
     if (action == "Forward"):
         pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
@@ -164,6 +160,8 @@ def simulate_environment(state, action):
 #     threading.Thread(target=measure_distance, args=(sensor_id, trig_arr[sensor_id], echo_arr[sensor_id], distance_arr)).start()
 
 
+state_action_stack = []
+
 state = rpi.get_state()
 while True:
     try:
@@ -171,10 +169,16 @@ while True:
             pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
             pwm.set_pwm(SPEED, 0, PWM_STOP)
             Log('STOP', state[D_FR], state[D_LH], state[D_RH])
-            next_state = rpi.get_state()
+            while state_action_stack:  # stackが空になるまで
+                s, a = state_action_stack.pop()
+                agent.learn(s, a, COLLISION_PENALTY, (0, 0, 0))
+            print("Collision, negative reward given.")
+            while next_state[D_FR] <= 20 or next_state[D_LH] <= 10 or next_state[D_RH] <= 10:
+                next_state = rpi.get_state()
+                time.sleep(0.5)
         else:
             action = agent.get_action(state)
-            simulate_environment(state, action)
+            act(action)
             Log(action, state[D_FR], state[D_LH], state[D_RH])
             next_state = rpi.get_state()
             Log(f"Next state: {next_state}", state[D_FR], state[D_LH], state[D_RH])
@@ -182,6 +186,17 @@ while True:
             Log(f"Reward: {reward}", state[D_FR], state[D_LH], state[D_RH])
             agent.learn(state, action, reward, next_state)
         
+        if keyboard.is_pressed('r'):  # 'r'キーが押された場合
+            s, a = state_action_stack.top()
+            while state_action_stack:  # stackが空になるまで
+                next_s, next_a = state_action_stack.pop()
+                agent.learn(s, a, GOOD_ACTION_REWARD, next_s)
+                s, a = next_s, next_a
+            print("Course completed, positive reward given.")
+            keyboard.read_event() 
+
+        if not state_action_stack or (state, action) != state_action_stack[-1]:
+            state_action_stack.append((state, action))
         state = next_state
     except KeyboardInterrupt:
         pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
@@ -190,4 +205,8 @@ while True:
         rpi.stop()
         sys.exit(0)
 
-
+pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
+pwm.set_pwm(SPEED, 0, PWM_STOP)
+agent.save_q_table("test.csv")
+rpi.stop()
+sys.exit(0)
