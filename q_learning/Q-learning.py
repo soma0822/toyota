@@ -190,29 +190,4 @@ while True:
         rpi.stop()
         sys.exit(0)
 
-#超音波センサーで距離を測る関数
 
-# while True:  #以下の部分をずっと繰り返す
-#     d_fr = Measure(trig_arr[FRONT_SENSOR],echo_arr[FRONT_SENSOR])
-
-#     d_lh = Measure(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
- 
-#     d_rh = Measure(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
-    
-#     Cntl(d_fr, d_lh, d_rh)
-#     time.sleep(0.01)
-
-# 学習後、Qテーブルを使用して運転
-# current_state = (2, 4, 1)  # 仮の初期状態
-# while True:
-#     action = actions[np.argmax(q_table[state_index[current_state]])]
-#     print(f"Taking action: {action}")
-    
-#     # センサーデータを取得して次の状態を決定する
-#     # この例ではランダムな次の状態を仮定
-#     next_state = np.random.choice(states)
-    
-#     if is_terminal_state(next_state):
-#         break
-
-#     current_state = next_state
