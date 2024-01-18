@@ -35,6 +35,6 @@ for f in range(0, STEPS, RESOLUTION):
                 for action in actions:
                     q_table[state_index[state], action_index[action]] = -1
             else:
-                q_table[state_index[state], action_index[action]] = 0.01
+                q_table[state_index[state], action_index[action]] = 1
 
 np.savetxt("test.csv", q_table, delimiter=",")
