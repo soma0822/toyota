@@ -201,12 +201,17 @@ while True:
     except KeyboardInterrupt:
         pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
         pwm.set_pwm(SPEED, 0, PWM_STOP)
-        # agent.save_q_table("test.csv")
         rpi.stop()
-        sys.exit(0)
-
-pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
-pwm.set_pwm(SPEED, 0, PWM_STOP)
-agent.save_q_table("test.csv")
-rpi.stop()
-sys.exit(0)
+        print("\nInterrupted by user")
+        try:
+            choice = input("Do you want to save the Q-table before exiting? (y/n): ").lower()
+            if choice == 'y':
+                agent.save_q_table("test.csv")
+                print("Q-table saved.")
+            else:
+                print("Q-table not saved.")
+        except Exception as e:
+            print(f"An error occurred while saving: {e}")
+        finally:
+            print("Exiting program.")
+            sys.exit(0)
