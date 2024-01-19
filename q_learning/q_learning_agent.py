@@ -50,9 +50,13 @@ class QLearningAgent:
         state_idx = self.state_index[state]
         action_values = self.q_table[state_idx]
         print(f"Q-values for state {state}: {action_values}")
-        max_action_idx = np.argmax(action_values)
-        print(f"Best action index: {max_action_idx}")
-        return self.actions[max_action_idx]
+        action_probabilities = self.softmax(action_values)
+        action = np.random.choice(self.actions, p=action_probabilities)
+        return action
+
+    def softmax(self, x):
+        e_x = np.exp(x - np.max(x))
+        return e_x / e_x.sum()
 
     def learn(self, state, action, reward, next_state):
         state_idx = self.state_index[state]
