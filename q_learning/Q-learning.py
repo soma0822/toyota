@@ -96,7 +96,7 @@ while True:
     except KeyboardInterrupt:
         pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
         pwm.set_pwm(SPEED, 0, PWM_STOP)
-        agent.save_q_table()
+        agent.save_q_table(Q_TABLE_PATH)
         rpi.stop()
         sys.exit(0)
 
