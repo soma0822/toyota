@@ -2,7 +2,7 @@ import numpy as np
 import random
 from itertools import product
 
-STEPS = 181
+STEPS = 121
 RESOLUTION = 2
 
 class QLearningAgent:
