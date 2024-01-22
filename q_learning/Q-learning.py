@@ -199,9 +199,12 @@ while True:
                 agent.save_q_table("test.csv")
                 print("Q-table saved.")
             elif choice == 'r':
-                s, a = state_action_stack.top()
+                flag = True
                 while state_action_stack:  # stackが空になるまで
                     next_s, next_a = state_action_stack.pop()
+                    if flag:
+                        s, a = next_s, next_a
+                        flag = False
                     agent.learn(s, a, GOOD_ACTION_REWARD, next_s)
                     s, a = next_s, next_a
                     print("Course completed, positive reward given.")
