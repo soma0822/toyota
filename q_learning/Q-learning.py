@@ -7,7 +7,6 @@ from datetime import datetime
 from q_learning_agent import QLearningAgent
 from raspberry_pi_controller import RaspberryPiController
 from feedback_server import FeedbackServer
-import keyboard
 
 # pin number
 SPEED = 13
@@ -185,15 +184,6 @@ while True:
             reward = get_reward(state, next_state, action)
             Log(f"Reward: {reward}", state[D_FR], state[D_LH], state[D_RH])
             agent.learn(state, action, reward, next_state)
-        
-        if keyboard.is_pressed('r'):  # 'r'キーが押された場合
-            s, a = state_action_stack.top()
-            while state_action_stack:  # stackが空になるまで
-                next_s, next_a = state_action_stack.pop()
-                agent.learn(s, a, GOOD_ACTION_REWARD, next_s)
-                s, a = next_s, next_a
-            print("Course completed, positive reward given.")
-            keyboard.read_event() 
 
         if not state_action_stack or (state, action) != state_action_stack[-1]:
             state_action_stack.append((state, action))
@@ -206,6 +196,15 @@ while True:
         try:
             choice = input("Do you want to save the Q-table before exiting? (y/n): ").lower()
             if choice == 'y':
+                agent.save_q_table("test.csv")
+                print("Q-table saved.")
+            elif choice == 'r':
+                s, a = state_action_stack.top()
+                while state_action_stack:  # stackが空になるまで
+                    next_s, next_a = state_action_stack.pop()
+                    agent.learn(s, a, GOOD_ACTION_REWARD, next_s)
+                    s, a = next_s, next_a
+                    print("Course completed, positive reward given.")
                 agent.save_q_table("test.csv")
                 print("Q-table saved.")
             else:
