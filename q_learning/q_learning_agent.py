@@ -49,9 +49,12 @@ class QLearningAgent:
     def get_best_action(self, state):
         state_idx = self.state_index[state]
         action_values = self.q_table[state_idx]
-        print(f"Q-values for state {state}: {action_values}")
-        action_probabilities = self.softmax(action_values)
-        action = np.random.choice(self.actions, p=action_probabilities)
+        if (True):
+            action = self.actions[np.argmax(action_values)]
+        else:
+            print(f"Q-values for state {state}: {action_values}")
+            action_probabilities = self.softmax(action_values)
+            action = np.random.choice(self.actions, p=action_probabilities)
         return action
 
     def softmax(self, x):
