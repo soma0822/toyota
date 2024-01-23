@@ -1,12 +1,12 @@
 import numpy as np
 from itertools import product
-from q_learning_agent import STEPS, RESOLUTION
+from q_learning_agent import STEPS, RESOLUTION, MIN_STEP
 
 LR_DIFF = 20
 
 actions = ["Forward", "Left", "Right"]
 action_index = {action: i for i, action in enumerate(actions)}
-states = list(product(range(0, STEPS, RESOLUTION), repeat=3))
+states = list(product(range(MIN_STEP, STEPS, RESOLUTION), repeat=3))
 state_index = {state: i for i, state in enumerate(states)}
 q_table = np.zeros((len(states), len(actions)))
 
@@ -25,9 +25,9 @@ def Cntl(d_fr, d_lh, d_rh):
             print('前に進む', d_fr, d_lh, d_rh)
             return "Forward"
 
-for f in range(0, STEPS, RESOLUTION):
-    for l in range(0, STEPS, RESOLUTION):
-        for r in range(0, STEPS, RESOLUTION):
+for f in range(MIN_STEP, STEPS, RESOLUTION):
+    for l in range(MIN_STEP, STEPS, RESOLUTION):
+        for r in range(MIN_STEP, STEPS, RESOLUTION):
             state = (f, l, r)
             d_lr = l - r
             action = Cntl(f, l, r)
@@ -35,6 +35,6 @@ for f in range(0, STEPS, RESOLUTION):
                 for action in actions:
                     q_table[state_index[state], action_index[action]] = -1
             else:
-                q_table[state_index[state], action_index[action]] = 1
+                q_table[state_index[state], action_index[action]] = 0.2
 
 np.savetxt("test3.csv", q_table, delimiter=",")
