@@ -16,9 +16,9 @@ SERVO = 14
 # pwm.set_pwm(SPEED_CNTL, 0, 380)
 # MAX = 350
 # MIN = 369
-PWM_FORWARD_MAX = 360
-PWM_FORWARD_MID = 362
-PWM_FORWARD_MIN = 364
+PWM_FORWARD_MAX = 362
+PWM_FORWARD_MID = 364
+PWM_FORWARD_MIN = 366
 PWM_STOP        = 380
 PWM_BACK        = 395
 
@@ -133,6 +133,11 @@ def get_reward(state, next_state, action):
             reward += 1
         else:
             reward += -2
+    if state[D_LH] < state[D_RH]:
+        if action == "Right":
+            reward += 1
+        elif action == "Left":
+            reward -= 1
     if state[D_RH] <= 40 and state[D_RH] < state[D_LH]:
         if action == "Left":
             reward += 1
