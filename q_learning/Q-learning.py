@@ -175,6 +175,7 @@ def act(action):
 state_action_stack = []
 
 state = rpi.get_state()
+next_state = state
 while True:
     try:
         if state[D_FR] <= 20 or state[D_LH] <= 10 or state[D_RH] <= 10:
