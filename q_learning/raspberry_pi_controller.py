@@ -1,7 +1,7 @@
 # raspberry_pi_controller.py
 import RPi.GPIO as GPIO
 import time
-from q_learning_agent import RESOLUTION, MIN_STEP, STEPS
+from q_learning_agent import RESOLUTION, MIN_STEP_1, MIN_STEP_2, MIN_STEP_3, STEPS
 
 # room temperature 
 T = 22 # °C
@@ -48,8 +48,6 @@ class RaspberryPiController:
         duration = sigoff - sigon
         distance = duration * VS / 2  # 音速を340m/sとして、距離（cm）を計算
 
-        if distance < MIN_STEP:
-            distance = MIN_STEP
         if MAX_DISTANCE < distance:
             distance = MAX_DISTANCE  # 距離が200cm以上の場合は200cmを返す
 
@@ -62,8 +60,14 @@ class RaspberryPiController:
         d_rh = self.measure_distance(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
 
         d_fr_rounded = (d_fr // RESOLUTION) * RESOLUTION
+        if d_fr_rounded < MIN_STEP_1:
+            d_fr_rounded = MIN_STEP_1
         d_lh_rounded = (d_lh // RESOLUTION) * RESOLUTION
+        if d_lh_rounded < MIN_STEP_2:
+            d_lh_rounded = MIN_STEP_2
         d_rh_rounded = (d_rh // RESOLUTION) * RESOLUTION
+        if d_rh_rounded < MIN_STEP_3:
+            d_rh_rounded = MIN_STEP_3
         state = (d_fr_rounded, d_lh_rounded, d_rh_rounded)
         print("state is ", state)
         return state

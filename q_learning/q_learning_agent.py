@@ -2,7 +2,9 @@ import numpy as np
 import random
 from itertools import product
 
-MIN_STEP = 9
+MIN_STEP_1 = 18
+MIN_STEP_2 = 9
+MIN_STEP_3 = 9
 STEPS = 112
 RESOLUTION = 3
 
@@ -22,7 +24,7 @@ class QLearningAgent:
         # このインデックスを使うことで，Q-tableを高速にアクセスできる
         self.action_index = {action: i for i, action in enumerate(self.actions)}
 
-        even_combinations = list(product(range(MIN_STEP, STEPS, RESOLUTION), repeat=3))
+        even_combinations = list(product(range(MIN_STEP_1, STEPS, RESOLUTION), range(MIN_STEP_2, STEPS, RESOLUTION), range(MIN_STEP_3, STEPS, RESOLUTION)))
         self.state_index = {state: i for i, state in enumerate(even_combinations)}
 
 
