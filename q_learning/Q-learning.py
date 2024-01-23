@@ -200,6 +200,9 @@ while True:
         elif rpi.measure_distance(36, 35) > 80:
             act("Right")
             Log("Right Right Right", state[D_FR], state[D_LH], state[D_RH])
+        elif rpi.measure_distance(36, 35) < 30:
+            act("Left")
+            Log("Left Left", state[D_FR], state[D_LH], state[D_RH])
         else:
             action = agent.get_action(state)
             act(action)
