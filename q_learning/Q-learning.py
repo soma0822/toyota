@@ -183,7 +183,7 @@ while True:
             Log('STOP', state[D_FR], state[D_LH], state[D_RH])
             while state_action_stack:  # stackが空になるまで
                 s, a = state_action_stack.pop()
-                agent.learn(s, a, COLLISION_PENALTY, (9, 9, 9))
+                agent.learn(s, a, COLLISION_PENALTY, (18, 9, 9))
             print("Collision, negative reward given.")
             while next_state[D_FR] <= 20 or next_state[D_LH] <= 10 or next_state[D_RH] <= 10:
                 next_state = rpi.get_state()
