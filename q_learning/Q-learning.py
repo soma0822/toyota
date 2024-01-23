@@ -88,7 +88,7 @@ pwm.set_pwm(SERVO, 0, PWM_STRAIGHT)
 pwm.set_pwm(SPEED, 0, PWM_STOP)
 
 TIME_PENALTY = -0.01  # 時間経過に対する負の報酬
-COLLISION_PENALTY = -2  # 衝突に対する負の報酬
+COLLISION_PENALTY = -3  # 衝突に対する負の報酬
 GOOD_ACTION_REWARD = 1  # ゴールや素晴らしい行動に対する正の報酬
 BAD_ACTION_PENALTY = -1  # 悪い行動に対する負の報酬
 
