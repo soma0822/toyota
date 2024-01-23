@@ -37,4 +37,4 @@ for f in range(0, STEPS, RESOLUTION):
             else:
                 q_table[state_index[state], action_index[action]] = 1
 
-np.savetxt("test.csv", q_table, delimiter=",")
+np.savetxt("test3.csv", q_table, delimiter=",")

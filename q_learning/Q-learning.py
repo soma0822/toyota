@@ -78,7 +78,7 @@ else:
 
 feedback_server = FeedbackServer()
 feedback_server.start_listening()
-Q_TABLE_PATH = "test.csv"
+Q_TABLE_PATH = "test3.csv"
 agent = QLearningAgent(Q_TABLE_PATH)
 rpi = RaspberryPiController()
 pwm = Adafruit_PCA9685.PCA9685(address=0x40)
@@ -110,23 +110,23 @@ def get_reward(state, next_state, action):
 
     if state[D_RH] <= 10:
         if action == "Left":
-            reward += 0.5
+            reward += 1
         elif action == "Right":
-            reward += -1
+            reward += -2
     if state[D_FR] <= 20:
         if action == "Forward":
-            reward += -1
+            reward += -2
     if state[D_FR]  <= state[D_LH]:
         if action == "Left":
-            reward += 0.5
+            reward += 1
     if state[D_FR] <= state[D_RH]:
         if action == "Right":
-            reward += 0.5
+            reward += 1
     if state[D_FR] >= 100:
         if action == "Forward":
-            reward += 0.5
+            reward += 1
     if state[D_FR] >= 40 and state[D_LH] >= 40 and state[D_RH] >= 40:
-            reward += 0.2
+            reward += 0.5
     return reward
 
 def act(action):

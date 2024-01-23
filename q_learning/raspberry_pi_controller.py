@@ -1,6 +1,7 @@
 # raspberry_pi_controller.py
 import RPi.GPIO as GPIO
 import time
+from q_learning_agent import RESOLUTION
 
 # room temperature 
 T = 22 # °C
@@ -58,9 +59,9 @@ class RaspberryPiController:
         d_lh = self.measure_distance(trig_arr[LEFT_SENSOR],echo_arr[LEFT_SENSOR])
         d_rh = self.measure_distance(trig_arr[RIGHT_SENSOR],echo_arr[RIGHT_SENSOR])
 
-        d_fr_rounded = (d_fr // 2) * 2
-        d_lh_rounded = (d_lh // 2) * 2
-        d_rh_rounded = (d_rh // 2) * 2
+        d_fr_rounded = (d_fr // RESOLUTION) * RESOLUTION
+        d_lh_rounded = (d_lh // RESOLUTION) * RESOLUTION
+        d_rh_rounded = (d_rh // RESOLUTION) * RESOLUTION
         state = (d_fr_rounded, d_lh_rounded, d_rh_rounded)
         print("state is ", state)
         return state
