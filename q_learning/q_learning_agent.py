@@ -10,7 +10,7 @@ class QLearningAgent:
     #lernen_rate:学習率 学習率が大きいと，Q値の更新量が大きくなる
     #discount_factor:割引率γ γが大きいと，長期的な報酬を重視する
     #epsilon:ε-greedy法のε εの確率でランダムに行動する
-    def __init__(self, q_table_path, learning_rate=0.3, discount_factor=0.7, epsilon=0):
+    def __init__(self, q_table_path, learning_rate=0.2, discount_factor=0.7, epsilon=0):
         self.actions = ["Forward", "Left", "Right"]
         self.learning_rate = learning_rate
         self.discount_factor = discount_factor

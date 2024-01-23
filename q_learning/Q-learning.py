@@ -209,7 +209,7 @@ while True:
         try:
             choice = input("Do you want to save the Q-table before exiting? (y/n): ").lower()
             if choice == 'y':
-                agent.save_q_table("test.csv")
+                agent.save_q_table(Q_TABLE_PATH)
                 print("Q-table saved.")
             elif choice == 'r':
                 flag = True
@@ -221,7 +221,7 @@ while True:
                     agent.learn(s, a, GOOD_ACTION_REWARD, next_s)
                     s, a = next_s, next_a
                     print("Course completed, positive reward given.")
-                agent.save_q_table("test.csv")
+                agent.save_q_table(Q_TABLE_PATH)
                 print("Q-table saved.")
             else:
                 print("Q-table not saved.")
