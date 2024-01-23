@@ -2,8 +2,6 @@ import numpy as np
 from itertools import product
 from q_learning_agent import STEPS, RESOLUTION, MIN_STEP_1, MIN_STEP_2, MIN_STEP_3
 
-LR_DIFF = 20
-
 actions = ["Forward", "Left", "Right"]
 action_index = {action: i for i, action in enumerate(actions)}
 states = list(product(range(MIN_STEP_1, STEPS, RESOLUTION), range(MIN_STEP_2, STEPS, RESOLUTION), range(MIN_STEP_3, STEPS, RESOLUTION)))
