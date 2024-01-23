@@ -122,9 +122,19 @@ def get_reward(state, next_state, action):
     if state[D_FR] <= state[D_RH]:
         if action == "Right":
             reward += 1
-    if state[D_FR] >= 100:
+    if state[D_FR] >= 100 and state[D_LH] >= 80 and state[D_RH] >= 80:
         if action == "Forward":
             reward += 1
+    if state[D_LH] <= 40 and state[D_RH] >= 50:
+        if action == "Right":
+            reward += 1
+        else:
+            reward += -1
+    if state[D_RH] <= 40 and state[D_LH] >= 50:
+        if action == "Left":
+            reward += 1
+        else:
+            reward += -1
     if state[D_FR] >= 40 and state[D_LH] >= 40 and state[D_RH] >= 40:
             reward += 0.5
     return reward
