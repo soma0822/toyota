@@ -13,10 +13,10 @@ def Cntl(d_fr, d_lh, d_rh):
         print('判断：止まる', d_fr, d_lh, d_rh)
         return "Stop"
     else:
-        if d_lh > 140 or d_rh < 30:
+        if d_lh > 100 or d_rh < 40:
             print('左に曲がる', d_fr, d_lh, d_rh)
             return "Left"
-        elif d_lh < 80 or (d_fr < d_rh):
+        elif d_lh < 80 or (d_fr + 10 < d_rh):
             print('右に曲がる', d_fr, d_lh, d_rh)
             return "Right"
         else:
