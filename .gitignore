@@ -2,3 +2,4 @@ test.csv
 __pycache__
 log
 test3.csv
+*.csv
