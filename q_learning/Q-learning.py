@@ -196,7 +196,7 @@ while True:
             next_state = rpi.get_state()
             Log(f"Next state: {next_state}", state[D_FR], state[D_LH], state[D_RH])
             reward = get_reward(state, next_state, action)
-            Log(f"Reward: {reward}", state[D_FR], state[D_LH], state[D_RH])
+            print(f"Reward: {reward}", state[D_FR], state[D_LH], state[D_RH])
             agent.learn(state, action, reward, next_state)
 
         if not state_action_stack or (state, action) != state_action_stack[-1]:
