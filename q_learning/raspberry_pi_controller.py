@@ -8,8 +8,9 @@ T = 22 # °C
 # speed of sound at T 
 VS = 33150 + 61 * T # cm / s
 
-trig_arr = [15,13,32] #Trigピン番号(正面、左、右)
-echo_arr = [26,24,31] #Echoピン番号(正面、左、右)
+trig_arr = [15,13,32,38, 36] #Trigピン番号(正面、左、右,左サイド)
+echo_arr = [26,24,31,37, 35]
+
 #上の配列でセンサーの位置を表すindex
 FRONT_SENSOR = 0
 LEFT_SENSOR  = 1

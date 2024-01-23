@@ -194,6 +194,10 @@ while True:
             while next_state[D_FR] <= 20 or next_state[D_LH] <= 10 or next_state[D_RH] <= 10:
                 next_state = rpi.get_state()
                 time.sleep(0.5)
+        elif rpi.measure_distance(38, 37) < 30:
+            act("Right")
+        elif rpi.measure_distance(36, 35) > 80:
+            act("Right")
         else:
             action = agent.get_action(state)
             act(action)
