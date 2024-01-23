@@ -32,8 +32,7 @@ class QLearningAgent:
         try:
             self.q_table = np.loadtxt(q_table_path, delimiter=",")
             # ファイルの中身の形が正しいかどうかチェック
-            len_one_dir = (STEPS // RESOLUTION) + 1
-            expected_shape = (len_one_dir * len_one_dir * len_one_dir, len(self.actions))
+            expected_shape = (((STEPS - MIN_STEP_1) // RESOLUTION + 1) * ((STEPS - MIN_STEP_2) // RESOLUTION + 1) * ((STEPS - MIN_STEP_3) // RESOLUTION + 1), len(self.actions))
             if self.q_table.shape != expected_shape:
                 print(f"Warning: Loaded q_table has shape {self.q_table.shape}, but expected {expected_shape}. Reinitializing q_table.")
                 self.q_table = np.zeros(expected_shape)
